@@ -4,6 +4,7 @@ import FreetCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
 import * as util from './util';
+import UserCollection from '../user/collection';
 
 const router = express.Router();
 
@@ -18,17 +19,17 @@ const router = express.Router();
 /**
  * Get freets by author.
  *
- * @name GET /api/freets?author=username
+ * @name GET /api/freets?authorId=id
  *
- * @return {FreetResponse[]} - An array of freets created by user with username, author
- * @throws {400} - If author is not given
- * @throws {404} - If no user has given author
+ * @return {FreetResponse[]} - An array of freets created by user with id, authorId
+ * @throws {400} - If authorId is not given
+ * @throws {404} - If no user has given authorId
  *
  */
 router.get(
   '/',
   async (req: Request, res: Response, next: NextFunction) => {
-    // Check if author query parameter was supplied
+    // Check if authorId query parameter was supplied
     if (req.query.author !== undefined) {
       next();
       return;
@@ -47,6 +48,96 @@ router.get(
     res.status(200).json(response);
   }
 );
+
+/**
+ * Get freets by author on today's date.
+ *
+ * @name GET /api/freets/date?authorId=id
+ *
+ * @return {FreetResponse[]} - An array of freets created by user with id, authorId
+ * @throws {400} - If authorId is not given
+ * @throws {404} - If no user has given authorId
+ *
+ */
+ router.get(
+  '/date',
+  [
+    userValidator.isAuthorExists
+  ],
+  async (req: Request, res: Response) => {
+    const authorFreetsOnThisDay = await FreetCollection.findAllOnThisDate(req.query.author as string);
+    const response = authorFreetsOnThisDay.map(util.constructFreetResponse);
+    res.status(200).json(response);
+  }
+);
+
+/**
+ * Get important freets for a user.
+ *
+ * @name GET /api/freets/important?user=USERNAME
+ *
+ * @return {FreetResponse[]} - An array of freets including the user's username
+ * @throws {400} - If authorId is not given
+ * @throws {404} - If no user has given authorId
+ *
+ */
+ router.get(
+  '/important',
+  [
+    // userValidator.doesUserExist // uncomment once it's fixed
+  ],
+  async (req: Request, res: Response) => {
+    const taggedFreets = await FreetCollection.findAllTag(req.query.user as string);
+    const response = taggedFreets.map(util.constructFreetResponse);
+    res.status(200).json(response);
+  }
+);
+
+/**
+ * Get seen freets for a user.
+ *
+ * @name GET /api/freets/seen?user=USERNAME
+ *
+ * @return {FreetResponse[]} - An array of freets that the user has seen
+ * @throws {400} - If authorId is not given
+ * @throws {404} - If no user has given authorId
+ *
+ */
+ router.get(
+  '/seen',
+  [
+    // userValidator.doesUserExist // uncomment once it's fixed
+  ],
+  async (req: Request, res: Response) => {
+    const seenFreets = await FreetCollection.getSeenFreets(req.query.user as string);
+    const response = seenFreets.map(util.constructFreetResponse);
+    res.status(200).json(response);
+  }
+);
+
+/**
+ * Get a user's following feed.
+ *
+ * @name GET /api/freets/following?user=USERNAME
+ *
+ * @return {FreetResponse[]} - An array of freets from other users that the user follows
+ * @throws {400} - If authorId is not given
+ * @throws {404} - If no user has given authorId
+ *
+ */
+ router.get(
+  '/following',
+  [
+    // userValidator.doesUserExist // uncomment once it's fixed
+  ],
+  async (req: Request, res: Response) => {
+
+    const followingFreets = await FreetCollection.getFollowingFreets(req.query.user as string);
+    const response = followingFreets.map(util.constructFreetResponse);
+    res.status(200).json(response);
+  }
+);
+
 
 /**
  * Create a new freet.
@@ -104,7 +195,7 @@ router.delete(
 /**
  * Modify a freet
  *
- * @name PATCH /api/freets/:id
+ * @name PUT /api/freets/:id
  *
  * @param {string} content - the new content for the freet
  * @return {FreetResponse} - the updated freet
@@ -114,7 +205,7 @@ router.delete(
  * @throws {400} - If the freet content is empty or a stream of empty spaces
  * @throws {413} - If the freet content is more than 140 characters long
  */
-router.patch(
+router.put(
   '/:freetId?',
   [
     userValidator.isUserLoggedIn,
@@ -128,6 +219,50 @@ router.patch(
       message: 'Your freet was updated successfully.',
       freet: util.constructFreetResponse(freet)
     });
+  }
+);
+
+/**
+ * Get a shortened freet.
+ *
+ * @name GET /api/freets/shortened?id=freetId
+ *
+ * @return {string} - A string of the shortened freet.
+ * @throws {400} - If freetId is not given
+ * @throws {404} - If freetId is invalid
+ *
+ */
+ router.get(
+  '/shortened',
+  [
+    // freetValidator.isFreetExists,
+  ],
+  async (req: Request, res: Response) => {
+    const response = await FreetCollection.shortenedFreet(req.query.id as string);
+    res.status(200).json(response);
+  }
+);
+
+/**
+ * Upvote a freet.
+ *
+ * @name PUT /api/freets/react/:freetId?
+ *
+ * @return {string} - A success message.
+ * @throws {400} - If freetId is not given
+ * @throws {404} - If freetId is invalid
+ *
+ */
+ router.put(
+  '/react/:freetId?',
+  [
+    freetValidator.isFreetExists, // need to uncomment this
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const user = await UserCollection.findOneByUserId(userId);
+    const response = await FreetCollection.upvotePost(user.username, req.params.freetId as string);
+    res.status(200).json(response);
   }
 );
 

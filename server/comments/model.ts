@@ -8,40 +8,35 @@ import type {User} from '../user/model';
  */
 
 // Type definition for Freet on the backend
-export type Freet = {
+export type Comment = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
   authorId: Types.ObjectId;
+  freetId: Types.ObjectId;
   dateCreated: Date;
   content: string;
   dateModified: Date;
   anonymous: boolean;
-  comments: Array<any>;
+  upvotes: number;
   upvoters: Array<any>;
-  upvotes: number;
-};
-
-export type PopulatedFreet = {
-  _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
-  authorId: User;
-  dateCreated: Date;
-  content: string;
-  dateModified: Date;
-  anonymous: boolean;
-  comments: [];
-  upvoters: Array<any>; // change Any to the proper type later
-  upvotes: number;
+  downvoters: Array<any>;
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
 // Freets stored in this table will have these fields, with the
 // type given by the type property, inside MongoDB
-const FreetSchema = new Schema<Freet>({
+const CommentSchema = new Schema<Comment>({
   // The author userId
   authorId: {
     // Use Types.ObjectId outside of the schema
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'User'
+  },
+  // The parent Freet
+  freetId: {
+    // Use Types.ObjectId outside of the schema
+    type: Schema.Types.ObjectId,
+    required: true,
   },
   // The date the freet was created
   dateCreated: {
@@ -62,10 +57,6 @@ const FreetSchema = new Schema<Freet>({
     type: Boolean,
     required: true
   },
-  comments: {
-    type: [],
-    required: true
-  },
   upvoters: {
     type: [],
     required: true
@@ -74,7 +65,11 @@ const FreetSchema = new Schema<Freet>({
     type: Number,
     required: true
   },
+  downvoters: {
+    type: [],
+    required: true
+  },
 });
 
-const FreetModel = model<Freet>('Freet', FreetSchema);
-export default FreetModel;
+const CommentModel = model<Comment>('Comment', CommentSchema);
+export default CommentModel;

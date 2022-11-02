@@ -6,6 +6,11 @@
       <header>
         <h2>Welcome @{{ $store.state.username }}</h2>
       </header>
+      <button
+      type="submit"
+    >
+      {{ button }}
+    </button>
       <CreateFreetForm />
     </section>
     <section v-else>

@@ -4,6 +4,14 @@
       <NavBar />
     </header>
     <router-view />
+
+    <div v-if="$store.state.username === 'Anonymous'">
+      <div class=body :style="`--backgroundColor: #969696`"></div>
+    </div>
+    <div v-else>
+      <div class=body :style="`--backgroundColor: #ffff`"></div>
+    </div>
+
   </div>
 </template>
 
@@ -21,7 +29,6 @@ export default {
       const user = res.user;
       this.$store.commit('setUsername', user ? user.username : null);
     });
-
     // Clear alerts on page refresh
     this.$store.state.alerts = {};
   }
@@ -40,6 +47,8 @@ body {
   padding: 0;
   margin: 0;
   font-size: 1.2em;
+  --backgroundColor: #363636;
+  background-color: var(--backgroundColor);
 }
 
 main {

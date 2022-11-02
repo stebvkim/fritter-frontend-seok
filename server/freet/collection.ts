@@ -21,11 +21,21 @@ class FreetCollection {
    */
   static async addOne(authorId: Types.ObjectId | string, content: string): Promise<HydratedDocument<Freet>> {
     const date = new Date();
+    const user = await UserCollection.findOneByUserId(authorId);
+    let anon = false;
+    let initUpvotes = 0;
+    const initUpvoters:Array<any> = [];
+    const commentArray:Array<any> = [];
+    if (user.username == 'Anonymous') anon = true;
     const freet = new FreetModel({
       authorId,
       dateCreated: date,
       content,
-      dateModified: date
+      dateModified: date,
+      anonymous: anon,
+      comments: commentArray,
+      upvoters: initUpvoters,
+      upvotes: initUpvotes,
     });
     await freet.save(); // Saves freet to MongoDB
     return freet.populate('authorId');
@@ -52,6 +62,128 @@ class FreetCollection {
   }
 
   /**
+   * Get all the freets in the database from the author on a certain date
+   *
+   * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets
+   */
+   static async findAllOnThisDate(username: string): Promise<Array<HydratedDocument<Freet>>> {
+    const author = await UserCollection.findOneByUsername(username);
+    const authorFreetArray = await FreetModel.find({authorId: author._id}).populate('authorId');
+    const onThisDayArray = [];
+    const date = new Date();
+    for (const freet of authorFreetArray)
+    {
+      const dateCreated = freet.dateCreated;
+      if (dateCreated.getDate() == date.getDate() && dateCreated.getMonth() == date.getMonth() && dateCreated.getFullYear() != date.getFullYear())
+      {
+        onThisDayArray.push(freet);
+      }
+    }
+    return onThisDayArray;
+  }
+
+  /**
+   * Get all the freets in the database that tag a certain user
+   *
+   * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets
+   */
+   static async findAllTag(username: string): Promise<Array<HydratedDocument<Freet>>> {
+    const freetArray = await FreetModel.find({}).sort({dateModified: -1}).populate('authorId');
+    const taggedUserArray = [];
+    for (const freet of freetArray)
+    {
+      const text = freet.content;
+      const tag = "@" + username + " ";
+      // this is a temporary fix for the @seok vs @seok1 example: currently works unless freet ends in the tag
+      // also currently shows self-freets -- get rid of these
+      // might want to think about being able to remove freets from important posts and insert them into normal feed?
+      if (text.includes(tag))
+      {
+        taggedUserArray.push(freet);
+      }
+    }
+    return taggedUserArray;
+  }
+
+  /**
+   * Get all of the seen freets for a certain user.
+   *
+   * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets
+   */
+   static async getSeenFreets(username: string): Promise<Array<HydratedDocument<Freet>>> {
+    const user = await UserCollection.findOneByUsername(username);
+    const emptyArray:Array<HydratedDocument<Freet>> = [];
+    if (user) return user.seen; // might be a terrible idea because of aliasing?
+    else {
+      return emptyArray;
+    }
+  }
+
+  /**
+   * Get all of the freets from freeters that the user follows.
+   *
+   * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets
+   */
+   static async getFollowingFreets(username: string): Promise<Array<HydratedDocument<Freet>>> {
+    const user = await UserCollection.findOneByUsername(username);
+    const followingFreets:Array<any> = []; // fix this lol
+    if (user)
+    {
+      for (const name of user.following)
+      {
+        const followFreet = await FreetModel.find({authorId: name._id}).populate('authorId');
+        for (const freet of followFreet)
+        {
+          if (freet.anonymous == false) followingFreets.push(freet);
+        }
+        followingFreets.push(followFreet);
+      }      
+    }
+    return followingFreets;
+  }
+
+    /**
+   * Get the shortened text for a freet.
+   *
+   * @return {Promise<string>} - A string of the freet's content.
+   */
+     static async shortenedFreet(freetId: Types.ObjectId | string): Promise<string> {
+      // maybe this shouldn't just return a string?
+      const freet = await FreetModel.findOne({_id: freetId}).populate('authorId');
+      const content = freet.content;
+      if (content.length > 300) 
+      {
+        return content.slice(0, 300);
+      }
+      return content;
+    }
+
+  /**
+   * User upvotes a post.
+   *
+   * @param {string} username - The user that upvotes the freet
+   * @param {string} freetId - The id of the freet to find
+   * @return {Promise<HydratedDocument<User>> | Promise<null>} - The user with the updated reputation.
+   */
+   static async upvotePost(username: string, freetId: Types.ObjectId | string): Promise<HydratedDocument<Freet>> {
+    const freet = await this.findOne(freetId);
+    if (freet && freet.upvoters.includes(username))
+    {
+      freet.upvotes -= 1;
+      const ix = freet.upvoters.indexOf(username);
+      freet.upvoters.splice(ix, 1);
+      await freet.save();
+    }
+    else if (freet && !(freet.upvoters.includes(username)))
+    {
+      freet.upvotes += 1;
+      freet.upvoters.push(username);
+      await freet.save();
+    }
+    return freet;
+  }
+
+  /**
    * Get all the freets in by given author
    *
    * @param {string} username - The username of author of the freets
@@ -59,7 +191,7 @@ class FreetCollection {
    */
   static async findAllByUsername(username: string): Promise<Array<HydratedDocument<Freet>>> {
     const author = await UserCollection.findOneByUsername(username);
-    return FreetModel.find({authorId: author._id}).sort({dateModified: -1}).populate('authorId');
+    return FreetModel.find({authorId: author._id}).populate('authorId');
   }
 
   /**

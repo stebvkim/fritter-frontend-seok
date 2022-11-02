@@ -1,4 +1,5 @@
 import type {Request, Response, NextFunction} from 'express';
+import {Types} from 'mongoose';
 import UserCollection from '../user/collection';
 
 /**
@@ -13,7 +14,9 @@ const isCurrentSessionUserExists = async (req: Request, res: Response, next: Nex
     if (!user) {
       req.session.userId = undefined;
       res.status(500).json({
-        error: 'User session was not recognized.'
+        error: {
+          userNotFound: 'User session was not recognized.'
+        }
       });
       return;
     }
@@ -29,7 +32,9 @@ const isValidUsername = (req: Request, res: Response, next: NextFunction) => {
   const usernameRegex = /^\w+$/i;
   if (!usernameRegex.test(req.body.username)) {
     res.status(400).json({
-      error: 'Username must be a nonempty alphanumeric string.'
+      error: {
+        username: 'Username must be a nonempty alphanumeric string.'
+      }
     });
     return;
   }
@@ -44,7 +49,25 @@ const isValidPassword = (req: Request, res: Response, next: NextFunction) => {
   const passwordRegex = /^\S+$/;
   if (!passwordRegex.test(req.body.password)) {
     res.status(400).json({
-      error: 'Password must be a nonempty string.'
+      error: {
+        password: 'Password must be a nonempty string.'
+      }
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Checks if a reputation is a valid number.
+ */
+ const isValidNumber = (req: Request, res: Response, next: NextFunction) => {
+  if (isNaN(req.body.repChange) != false) {
+    res.status(404).json({
+      error: {
+        repChange: 'repChange must be a valid number.'
+      }
     });
     return;
   }
@@ -74,25 +97,49 @@ const isAccountExists = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
+// THIS FUNCTION DOESN'T WORK RIGHT NOW. FIX LATER. maybe change to be negation of isUsernameNotAlreadyInUse?
+/**
+ * Checks if a user with username and password in req.body exists
+ */
+ const doesUserExist = async (req: Request, res: Response, next: NextFunction) => {
+  const {username} = req.body as {username: string};
+
+  if (!username) {
+    res.status(400).json({error: `User doesn't exist.`});
+    return;
+  }
+
+  const user = await UserCollection.findOneByUsername(
+    username
+  );
+
+  if (user) {
+    next();
+  } else {
+    res.status(401).json({error: 'Nonexistent user.'});
+  }
+};
+
 /**
  * Checks if a username in req.body is already in use
  */
 const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: NextFunction) => {
-  if (req.body.username !== undefined) { // If username is not being changed, skip this check
-    const user = await UserCollection.findOneByUsername(req.body.username);
+  const user = await UserCollection.findOneByUsername(req.body.username);
 
-    // If the current session user wants to change their username to one which matches
-    // the current one irrespective of the case, we should allow them to do so
-    if (user && (user?._id.toString() !== req.session.userId)) {
-      res.status(409).json({
-        error: 'An account with this username already exists.'
-      });
-      return;
-    }
+  // If the current session user wants to change their username to one which matches
+  // the current one irrespective of the case, we should allow them to do so
+  if (!user || (user?._id.toString() === req.session.userId)) {
+    next();
+    return;
   }
 
-  next();
+  res.status(409).json({
+    error: {
+      username: 'An account with this username already exists.'
+    }
+  });
 };
+
 
 /**
  * Checks if the user is logged in, that is, whether the userId is set in session
@@ -100,7 +147,9 @@ const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: Next
 const isUserLoggedIn = (req: Request, res: Response, next: NextFunction) => {
   if (!req.session.userId) {
     res.status(403).json({
-      error: 'You must be logged in to complete this action.'
+      error: {
+        auth: 'You must be logged in to complete this action.'
+      }
     });
     return;
   }
@@ -152,5 +201,7 @@ export {
   isAccountExists,
   isAuthorExists,
   isValidUsername,
-  isValidPassword
+  isValidPassword,
+  doesUserExist,
+  isValidNumber
 };

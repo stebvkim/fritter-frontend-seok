@@ -10,7 +10,9 @@ const isFreetExists = async (req: Request, res: Response, next: NextFunction) =>
   const freet = validFormat ? await FreetCollection.findOne(req.params.freetId) : '';
   if (!freet) {
     res.status(404).json({
-      error: `Freet with freet ID ${req.params.freetId} does not exist.`
+      error: {
+        freetNotFound: `Freet with freet ID ${req.params.freetId} does not exist.`
+      }
     });
     return;
   }
@@ -31,7 +33,7 @@ const isValidFreetContent = (req: Request, res: Response, next: NextFunction) =>
     return;
   }
 
-  if (content.length > 140) {
+  if (content.length > 5000) {
     res.status(413).json({
       error: 'Freet content must be no more than 140 characters.'
     });
