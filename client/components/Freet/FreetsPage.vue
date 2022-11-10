@@ -4,13 +4,13 @@
   <main>
     <section v-if="$store.state.username">
       <header>
-        <h2>Welcome @{{ $store.state.username }}</h2>
+        <h2>Welcome back, @{{ $store.state.username }}</h2>
       </header>
-      <button
+      <!-- <button
       type="submit"
     >
       {{ button }}
-    </button>
+    </button> -->
       <CreateFreetForm />
     </section>
     <section v-else>
@@ -22,15 +22,93 @@
           <router-link to="/login">
             Sign in
           </router-link>
-          to create, edit, and delete freets.
+          to view, create, edit, and delete freets.
         </h3>
       </article>
     </section>
-    <section>
+    
+    <section v-if="$store.state.username">
       <header>
-        <div class="left">
+        <div class="left" id="important-freets">
+          <h2>Important Freets for @{{ $store.state.username }}</h2>
+        </div>
+      </header>
+      <section
+        v-if="$store.state.importantFreets.length"
+      >
+        <FreetComponent
+          v-for="freet in $store.state.importantFreets"
+          :key="freet.id"
+          :freet="freet"
+        />
+      </section>
+      <article
+        v-else
+      >
+        <h3>No important freets found.</h3>
+      </article>
+    </section>
+
+    <br>
+
+    <section v-if="$store.state.username">
+      <header>
+        <div class="left" id="on-this-day">
+          <h2>Freets made by @{{$store.state.username}} on this day</h2>
+        </div>
+      </header>
+      <section
+        v-if="$store.state.onThisDayFreets.length"
+      >
+        <h1>Something was found!</h1>
+        <FreetComponent
+          v-for="freet in $store.state.freets"
+          :key="freet.id"
+          :freet="freet"
+        />
+      </section>
+      <article
+        v-else
+      >
+        <h3>No freets found on this day from previous years.</h3>
+      </article>
+    </section>
+    
+    <br>
+
+    <section v-if="$store.state.username">
+      <header>
+        <div class="left" id="following-feed">
           <h2>
-            Viewing all freets
+            Freets from Freeters you follow
+          </h2>
+        </div>
+      </header>
+
+      <section
+        v-if="$store.state.followingFreets.length"
+      >
+        <FreetComponent
+          v-for="freet in $store.state.followingFreets"
+          :key="freet.id"
+          :freet="freet"
+        />
+      </section>
+      <article
+        v-else
+      >
+        <h3>No freets found.</h3>
+      </article>
+    </section>
+
+    <hr id = "line">
+    <br>
+
+    <section v-if="$store.state.username">
+      <header>
+        <div class="left" id="general-freets">
+          <h2>
+            All Freets
             <span v-if="$store.state.filter">
               by @{{ $store.state.filter }}
             </span>
@@ -45,6 +123,7 @@
           />
         </div>
       </header>
+
       <section
         v-if="$store.state.freets.length"
       >
@@ -60,6 +139,8 @@
         <h3>No freets found.</h3>
       </article>
     </section>
+
+
   </main>
 </template>
 
@@ -67,13 +148,22 @@
 import FreetComponent from '@/components/Freet/FreetComponent.vue';
 import CreateFreetForm from '@/components/Freet/CreateFreetForm.vue';
 import GetFreetsForm from '@/components/Freet/GetFreetsForm.vue';
+import ImportantFreets from '@/components/Freet/ImportantFreets.vue';
+import OnThisDay from '@/components/Freet/OnThisDay.vue';
 
 export default {
   name: 'FreetPage',
-  components: {FreetComponent, GetFreetsForm, CreateFreetForm},
+  components: {FreetComponent, GetFreetsForm, CreateFreetForm, ImportantFreets, OnThisDay},
+
+  beforeMount() {
+    this.$refs.getFreetsForm.relevant();
+  },
+
   mounted() {
     this.$refs.getFreetsForm.submit();
-  }
+    this.$refs.getFreetsForm.relevant();
+  },
+
 };
 </script>
 
@@ -97,5 +187,45 @@ section .scrollbox {
   flex: 1 0 50vh;
   padding: 3%;
   overflow-y: scroll;
+}
+
+#line {
+  width:100%;
+  height: 5px;
+  color: black;
+  background-color: black;
+  margin-left:0
+}
+
+#on-this-day {
+  width: 100vw;
+  border-radius: 25px;
+  padding-left: 2%;
+  white-space: nowrap;
+  background-color: rgb(238, 255, 110);
+}
+
+#important-freets {
+  width: 100vw;
+  border-radius: 25px;
+  padding-left: 2%;
+  white-space: nowrap;
+  background-color: rgb(255, 97, 97);
+}
+
+#following-feed {
+  width: 100vw;
+  border-radius: 25px;
+  padding-left: 2%;
+  white-space: nowrap;
+  background-color: rgb(101, 255, 135);
+}
+
+#general-freets {
+  width: 100vw;
+  border-radius: 25px;
+  padding-left: 2%;
+  white-space: nowrap;
+  background-color: rgb(102, 92, 241);
 }
 </style>

@@ -237,7 +237,7 @@ router.delete(
 /**
  * Remove a follower.
  *
- * @name DELETE /api/users/followers/:followId?
+ * @name DELETE /api/users/followers
  *
  * @return {string} - A success message
  * @throws {403} - if the user is not logged in
@@ -245,15 +245,13 @@ router.delete(
  * @throws {400} - if the user is already not following that person
  */
  router.delete(
-  '/followers/:followId?',
+  '/followers',
   [
     userValidator.isUserLoggedIn
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    console.log('asdfasdfasdf');
-    console.log(req.params);
-    await UserCollection.removeFromFollowList(userId, req.params.followId);
+    await UserCollection.removeFromFollowList(userId, req.body.user);
     res.status(200).json({
       message: 'Successfully removed the follower.'
     });

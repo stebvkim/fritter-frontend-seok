@@ -47,8 +47,9 @@ body {
   padding: 0;
   margin: 0;
   font-size: 1.2em;
-  --backgroundColor: #363636;
+  --backgroundColor: rgb(192, 250, 255);
   background-color: var(--backgroundColor);
+  font-family: sans-serif;
 }
 
 main {

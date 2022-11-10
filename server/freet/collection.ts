@@ -126,19 +126,32 @@ class FreetCollection {
    */
    static async getFollowingFreets(username: string): Promise<Array<HydratedDocument<Freet>>> {
     const user = await UserCollection.findOneByUsername(username);
-    const followingFreets:Array<any> = []; // fix this lol
+    let followingFreets:Array<any> = []; // fix this lol
     if (user)
     {
+      console.log('user: ' + user);
       for (const name of user.following)
       {
-        const followFreet = await FreetModel.find({authorId: name._id}).populate('authorId');
-        for (const freet of followFreet)
-        {
-          if (freet.anonymous == false) followingFreets.push(freet);
-        }
-        followingFreets.push(followFreet);
+        console.log(name);
+        const followFreet = await this.findAllByUsername(name);
+        console.log(followFreet);
+        console.log('-----------------------------');
+        followingFreets = followingFreets.concat(followFreet);
       }      
     }
+    console.log(followingFreets);
+
+    for (const freet of followingFreets)
+    {
+      if (freet.anonymous == true)
+      {
+        const index = followingFreets.indexOf(freet, 0);
+        if (index > -1) {
+          followingFreets.splice(index, 1);
+        }
+      }
+    }
+
     return followingFreets;
   }
 

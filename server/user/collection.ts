@@ -120,7 +120,7 @@ class UserCollection {
    static async addToFollowList(username: string, toFollow: string): Promise<HydratedDocument<User>> {
 
     const user =  await UserModel.findOne({_id: username});
-    const follow =  await UserModel.findOne({username: new RegExp(`^${toFollow.trim()}$`, 'i')});
+    const follow =  await UserModel.findOne({username: toFollow});
     if (user.following.includes(toFollow) == false && follow != null) user.following.push(toFollow);
 
     await user.save();

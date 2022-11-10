@@ -4,20 +4,23 @@
 import BlockForm from '@/components/common/BlockForm.vue';
 
 export default {
-  name: 'NighthawkModeForm',
+  name: 'FollowForm',
   mixins: [BlockForm],
   data() {
     return {
-      url: '/api/users/anonymous',
-      method: 'DELETE',
-      setUsername: true,
-      title: 'Toggle NighthawkMode',
-      fields: [],
-      content: 'In NighthawkMode, your Freets and Comments will be labeled as Anonymous.',
+      url: '/api/users/followers',
+      method: 'PUT',
+      hasBody: true,
+      setUsername: false,
+      title: 'Follow user',
+      fields: [
+        {id: 'user', label: 'Username', value: ''}
+      ],
+      content: 'Follow:',
       callback: () => {
         this.$router.push({name: 'Home'}); // Goes to Home page after signing out
         this.$store.commit('alert', {
-          message: 'NighthawkMode turned on / off.', status: 'success'
+          message: 'Successfully followed user.', status: 'success'
         });
       }
     };

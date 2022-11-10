@@ -12,19 +12,25 @@
     </div>
     <div class="right">
       <router-link to="/">
-        Home
+        Home 🏠
       </router-link>
       <router-link
         v-if="$store.state.username"
         to="/account"
       >
-        Account
+        Account 😀
       </router-link>
       <router-link
         v-else
         to="/login"
       >
-        Login
+        Login 👩‍💻
+      </router-link>
+      <router-link
+        v-if="$store.state.username"
+        to="/following"
+      >
+        Following 📱
       </router-link>
     </div>
     <section class="alerts">
@@ -42,11 +48,12 @@
 <style scoped>
 nav {
     padding: 1vw 2vw;
-    background-color: #ccc;
+    background-color: rgb(69, 195, 215);
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: relative;
+    font-family: sans-serif;
 }
 
 .title {
@@ -72,6 +79,7 @@ img {
 }
 
 .right a {
+    text-decoration: none;
     margin-left: 5px;
 }
 

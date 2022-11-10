@@ -7,7 +7,7 @@ export default {
   name: 'GetFreetsForm',
   mixins: [InlineForm],
   data() {
-    return {value: this.$store.state.filter};
+    return {value: this.$store.state.filter, name: this.$store.state.username};
   },
   methods: {
     async submit() {
@@ -36,6 +36,56 @@ export default {
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);
       }
+    },
+    async relevant() {
+      const dateUrl = `/api/freets/date?author=${this.name}`;
+      try {
+        const r = await fetch(dateUrl);
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.error);
+        }
+        this.$store.commit('updateOnThisDay', res);
+      }
+      catch (e) {
+        this.$store.commit('updateOnThisDay', []);
+      }
+
+      const importantUrl = `/api/freets/important?user=${this.name}`;
+      try {
+        const r = await fetch(importantUrl);
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.error);
+        }
+        this.$store.commit('updateImportant', res);
+      }
+      catch (e) {
+        this.$store.commit('updateImportant', []);
+      }        
+
+      const followingUrl = `/api/freets/following?user=${this.name}`;
+      try {
+        const r = await fetch(followingUrl);
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.error);
+        }
+        this.$store.commit('updateFollowing', res);
+      }
+      catch (e) {
+        this.$store.commit('updateFollowing', []);
+      }   
+      
+      const followingUsers = [];
+      for (const freet of this.$store.state.followingFreets)
+      {
+        if (followingUsers.includes(freet['author'])==false)
+        {
+          followingUsers.push(freet["author"]);
+        }
+      }
+      this.$store.commit('updateFollowingUsers', followingUsers);
     }
   }
 };

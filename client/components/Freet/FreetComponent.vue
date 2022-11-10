@@ -6,9 +6,14 @@
     class="freet"
   >
     <header>
-      <h3 class="author">
+
+      <h3 class="author" v-if="freet.anonymous === true">
+        @{{ "Anonymous" }}      
+      </h3>
+      <h3 class="author" v-else>
         @{{ freet.author }}
       </h3>
+
       <div
         v-if="$store.state.username === freet.author"
         class="actions"
@@ -52,6 +57,13 @@
       Posted at {{ freet.dateModified }}
       <i v-if="freet.edited">(edited)</i>
     </p>
+
+    <p><b>Upvotes: {{freet.upvotes}}</b></p>
+
+    <button @click="upvoteFreet">
+      👍 Upvote Freet
+    </button>
+
     <section class="alerts">
       <article
         v-for="(status, alert, index) in alerts"
@@ -161,16 +173,39 @@ export default {
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);
       }
-    }
+    },
+    async upvoteFreet() {
+      const options = {
+        method: 'PUT', headers: {'Content-Type': 'application/json'}
+      };
+
+      const upvoteUrl = `/api/freets/react/${this.freet._id}`;
+      try {
+        const r = await fetch(upvoteUrl, options);
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.error);
+        }
+        this.editing = false;
+        this.$store.commit('refreshFreets');
+
+      } catch (e) {
+        console.log('asdfasdfasdfafdsaf');
+        this.$set(this.alerts, e, 'error');
+        setTimeout(() => this.$delete(this.alerts, e), 3000);
+      }
+    },
   }
 };
 </script>
 
 <style scoped>
 .freet {
-    border: 1px solid #111;
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 25px;
     padding: 20px;
     position: relative;
     background-color: #ffff;
+    word-wrap: break-word;
 }
 </style>

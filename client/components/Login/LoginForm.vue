@@ -22,6 +22,7 @@ export default {
         this.$store.commit('alert', {
           message: 'You are now signed in!', status: 'success'
         });
+        this.$refs.getFreetsForm.relevant();
       }
     };
   }

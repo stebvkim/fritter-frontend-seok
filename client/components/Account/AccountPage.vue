@@ -4,6 +4,7 @@
 <template>
   <main>
     <section>
+
       <header>
         <h2>Account settings for @{{ $store.state.username }}</h2>
       </header>
@@ -35,7 +36,7 @@ export default {
     ChangePasswordForm,
     NighthawkModeForm,
     DeleteAccountForm,
-    LogoutForm
+    LogoutForm,
   }
 };
 </script>

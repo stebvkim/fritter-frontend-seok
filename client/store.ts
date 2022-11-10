@@ -12,7 +12,11 @@ const store = new Vuex.Store({
     filter: null, // Username to filter shown freets by (null = show all)
     freets: [], // All freets created in the app
     username: null, // Username of the logged in user
-    alerts: {} // global success/error messages encountered during submissions to non-visible forms
+    alerts: {}, // global success/error messages encountered during submissions to non-visible forms
+    followingFreets: [],
+    importantFreets: [],
+    onThisDayFreets: [],
+    following: [], // contains one freet from every user the user follows
   },
   mutations: {
     alert(state, payload) {
@@ -44,6 +48,30 @@ const store = new Vuex.Store({
        * @param freets - Freets to store
        */
       state.freets = freets;
+    },
+    updateImportant(state, freets) {
+      /**
+       * Update the stored freets to the provided freets.
+       * @param freets - Freets to store
+       */
+      state.importantFreets = freets;
+    },
+    updateOnThisDay(state, freets) {
+      /**
+       * Update the stored freets to the provided freets.
+       * @param freets - Freets to store
+       */
+      state.onThisDayFreets = freets;
+    },
+    updateFollowing(state, freets) {
+      /**
+       * Update the stored freets to the provided freets.
+       * @param freets - Freets to store
+       */
+      state.followingFreets = freets;
+    },
+    updateFollowingUsers(state, users) {
+      state.following = users;
     },
     async refreshFreets(state) {
       /**
