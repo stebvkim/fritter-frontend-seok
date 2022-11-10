@@ -4,14 +4,10 @@
   <main>
     <section v-if="$store.state.username">
       <header>
-        <h2>Welcome back, @{{ $store.state.username }}</h2>
+        <h2 v-if="$store.state.username === 'Anonymous'">Welcome. You are in NighthawkMode, and your actions will show up as @Anonymous. 🦇🐱‍👤</h2>
+        <h2 v-else>Welcome back, @{{ $store.state.username }}</h2>
       </header>
-      <!-- <button
-      type="submit"
-    >
-      {{ button }}
-    </button> -->
-      <CreateFreetForm />
+      <CreateFreetForm/>
     </section>
     <section v-else>
       <header>
@@ -29,6 +25,7 @@
     
     <section v-if="$store.state.username">
       <header>
+
         <div class="left" id="important-freets">
           <h2>Important Freets for @{{ $store.state.username }}</h2>
         </div>
@@ -164,6 +161,7 @@ export default {
     this.$refs.getFreetsForm.relevant();
   },
 
+
 };
 </script>
 
@@ -199,6 +197,8 @@ section .scrollbox {
 
 #on-this-day {
   width: 100vw;
+  border-style: solid;
+  border-width: thin;
   border-radius: 25px;
   padding-left: 2%;
   white-space: nowrap;
@@ -207,6 +207,8 @@ section .scrollbox {
 
 #important-freets {
   width: 100vw;
+  border-style: solid;
+  border-width: thin;
   border-radius: 25px;
   padding-left: 2%;
   white-space: nowrap;
@@ -215,6 +217,8 @@ section .scrollbox {
 
 #following-feed {
   width: 100vw;
+  border-style: solid;
+  border-width: thin;
   border-radius: 25px;
   padding-left: 2%;
   white-space: nowrap;
@@ -223,6 +227,8 @@ section .scrollbox {
 
 #general-freets {
   width: 100vw;
+  border-style: solid;
+  border-width: thin;
   border-radius: 25px;
   padding-left: 2%;
   white-space: nowrap;

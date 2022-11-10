@@ -125,6 +125,7 @@ form {
   justify-content: space-between;
   margin-bottom: 14px;
   position: relative;
+  background-color: rgb(255, 255, 255);
 }
 
 article > div {

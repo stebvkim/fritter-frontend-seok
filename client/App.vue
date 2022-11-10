@@ -47,9 +47,9 @@ body {
   padding: 0;
   margin: 0;
   font-size: 1.2em;
-  --backgroundColor: rgb(192, 250, 255);
+  --backgroundColor: rgb(219, 250, 253);
   background-color: var(--backgroundColor);
-  font-family: sans-serif;
+  font-family: cursive;
 }
 
 main {

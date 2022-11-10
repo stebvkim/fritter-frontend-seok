@@ -11,6 +11,7 @@ import type {User} from '../user/model';
 export type Comment = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
   authorId: Types.ObjectId;
+  author: string;
   freetId: Types.ObjectId;
   dateCreated: Date;
   content: string;
@@ -31,6 +32,10 @@ const CommentSchema = new Schema<Comment>({
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'User'
+  },
+  author: {
+    type: String,
+    required: true
   },
   // The parent Freet
   freetId: {

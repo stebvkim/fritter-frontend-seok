@@ -23,6 +23,7 @@ class CommentCollection {
     if (user.username == 'Anonymous') anon = true;
     const comment = new CommentModel({
       authorId,
+      author: user,
       freetId: freetId,
       dateCreated: date,
       content,

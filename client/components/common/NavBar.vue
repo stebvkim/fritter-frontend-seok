@@ -7,30 +7,30 @@
     <div class="left">
       <img src="../../public/logo.svg">
       <h1 class="title">
-        Fritter
+        fritter: a better twitter
       </h1>
     </div>
     <div class="right">
       <router-link to="/">
-        Home 🏠
-      </router-link>
-      <router-link
-        v-if="$store.state.username"
-        to="/account"
-      >
-        Account 😀
-      </router-link>
-      <router-link
-        v-else
-        to="/login"
-      >
-        Login 👩‍💻
+        home 🏠
       </router-link>
       <router-link
         v-if="$store.state.username"
         to="/following"
       >
-        Following 📱
+        following 📱
+      </router-link>
+      <router-link
+        v-if="$store.state.username"
+        to="/account"
+      >
+        account 😀
+      </router-link>
+      <router-link
+        v-else
+        to="/login"
+      >
+        login 👩‍💻
       </router-link>
     </div>
     <section class="alerts">
@@ -53,7 +53,9 @@ nav {
     justify-content: space-between;
     align-items: center;
     position: relative;
-    font-family: sans-serif;
+    font-family: cursive;
+    border-style: solid;
+    border-width: 3px;
 }
 
 .title {

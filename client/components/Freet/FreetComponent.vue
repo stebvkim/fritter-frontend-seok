@@ -64,6 +64,17 @@
       👍 Upvote Freet
     </button>
 
+    <hr>
+
+    <h4><b>Comments:</b></h4>
+
+    <p v-for="comment in freet.comments">
+      {{comment.authorId}}: "{{comment.content}}"
+      <!-- this was supposed to use comment.author.username but it doesn't work for some reason -->
+    </p>
+    <input type="text" name="comment">
+    <button @click="addComment({text})">Submit comment</button>
+
     <section class="alerts">
       <article
         v-for="(status, alert, index) in alerts"
@@ -90,7 +101,8 @@ export default {
     return {
       editing: false, // Whether or not this freet is in edit mode
       draft: this.freet.content, // Potentially-new content for this freet
-      alerts: {} // Displays success/error messages encountered during freet modification
+      alerts: {}, // Displays success/error messages encountered during freet modification
+      upvotes: this.freet.upvotes,
     };
   },
   methods: {
